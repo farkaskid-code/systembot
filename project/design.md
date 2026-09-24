@@ -1,4 +1,4 @@
-# System-Agent CLI Tool Specification
+# systembot CLI Tool Specification
 
 ## What & Why
 - A one-shot CLI tool that acts as a bridge between natural language instructions and shell execution, using a local LLM for both command generation and analysis.
@@ -29,7 +29,7 @@
 
 ## Core Features
 **Must-have**
-- CLI interface: `system-agent "natural language prompt"`
+- CLI interface: `systembot "natural language prompt"`
 - LLM integration for command generation and analysis
 - Safe command execution with validation
 - Output of execution results to the LLM for analysis
@@ -122,7 +122,7 @@
 
 ## Example Workflow
 ```bash
-$ system-agent "why is the system feeling slow?"
+$ systembot "why is the system feeling slow?"
 [SYSTEM] Running: top -b -n 1
 [SYSTEM] Running: iostat -d 1 2
 [SYSTEM] Running: journalctl --since "24 hours ago"
