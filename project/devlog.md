@@ -20,4 +20,10 @@
    - Mocked the `response.response` for the invalid JSON test case and expected a `ValueError` with the specified message.
    - Committed changes with git hash f2949c9 and commit message: "test: Mock response.response for invalid JSON test and expect ValueError".
 
+4. **Command Validation**
+   - Implemented the `validate_commands` function in `src/validator.py` to validate commands against a blacklist.
+   - Added unit tests for the `validate_commands` function in `tests/test_validator.py`.
+   - Committed changes with git hash 5b85c9c and commit message: "test: Update config not found test to mock open function".
+   - Committed changes with git hash 7fe50f3 and commit message: "docs: Update design and plan to reflect blacklist approach and config.yaml usage".
+
 This log will be updated as each step is completed.

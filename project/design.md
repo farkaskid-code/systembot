@@ -38,7 +38,7 @@
 **Nice-to-have**
 - Pretty terminal output (e.g., with `rich`)
 - Logging of executed commands and results
-- Configurable command whitelist/blacklist
+- Configurable command blacklist
 
 ---
 
@@ -70,7 +70,7 @@
 | Shell Execution     | Build                  | Python `subprocess`| Safe implementation required |
 | CLI Parsing         | Build                  | Python `argparse`  | For single-argument input |
 | Terminal Output     | Use Existing           | `rich`             | Optional, for better formatting |
-| Command Validation  | Build                  | Custom logic       | Whitelist allowed commands |
+| Command Validation  | Build                  | Custom logic       | Blacklist restricted commands  |
 
 ---
 
@@ -92,19 +92,19 @@
 ### **Implementation Order**
 1. **CLI Parsing**: Use `argparse` to handle the single input argument.
 2. **LLM Integration**: Use the Ollama Python client to send prompts and receive responses.
-3. **Command Validation**: Implement a whitelist of allowed commands (e.g., `find`, `ls`, `mkdir`).
+3. **Command Validation**: Implement a blacklist of disallowed commands (e.g., `rm`, `shutdown`, `reboot`).
 4. **Command Execution**: Use `subprocess.run()` with `capture_output=True` and `timeout`.
 5. **Output Analysis**: Send command outputs back to the LLM for analysis.
 6. **Final Output**: Display the LLM's analysis to the user in natural language.
 
 ### **Keep Simple**
-- Start with a minimal command whitelist (e.g., `find`, `ls`, `mkdir`, `mv`, `rm`).
+- Start with a minimal command blacklist (e.g., `rm`, `shutdown`, `reboot`).
 - Avoid complex logic in the agent (it should be a passive relay).
 - Use `subprocess.run()` with `shell=False` to avoid shell injection risks.
 
 ### **Known Risks**
 - **Model Hallucination**: The LLM may generate invalid or dangerous commands.
-  - Mitigation: Use a strict command whitelist and validate all commands before execution.
+  - Mitigation: Use a strict command blacklist and validate all commands before execution.
 - **Command Output Size**: Large outputs could cause memory issues or DoS.
   - Mitigation: Truncate outputs to a reasonable size (e.g., 10,000 characters).
 - **User Misunderstanding**: The LLM may misinterpret the user's intent.
@@ -117,6 +117,12 @@
 - **No Chat State**: No memory of previous interactions or context.
 - **Natural Language**: All input and output is in natural language (no shell syntax required).
 - **Safe by Default**: The agent validates all commands before execution.
+
+---
+
+## Build vs Existing Tools
+- **Build**: This tool is built from scratch using Python and its standard libraries, ensuring full control over the implementation and security.
+- **Existing Tools**: There are existing tools like ChatGPT CLI and ShellGPT that offer similar functionalities, but they rely on external APIs and may not provide the same level of control and security as a locally hosted solution.
 
 ---
 

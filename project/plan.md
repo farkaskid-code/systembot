@@ -39,8 +39,8 @@
 ## 4. Command Validation
    - **File:** `src/validator.py`
    - **Functionality:**
-     - Implement a whitelist of allowed commands (e.g., `find`, `ls`, `mkdir`, `mv`, `rm`).
-     - Validate each `generated_command` against the whitelist.
+     - Implement a blacklist of disallowed commands (e.g., `rm`, `shutdown`, `reboot`).
+     - Validate each `generated_command` against the blacklist.
      - Return a list of valid commands.
 
 ## 5. Command Execution

@@ -1,0 +1,6 @@
+blacklist:
+  - rm
+  - shutdown
+  - reboot
+  - dd
+  - mkfs
