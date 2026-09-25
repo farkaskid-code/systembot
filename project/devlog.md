@@ -11,3 +11,13 @@
    - Added unit tests for `src/cli.py` in the `tests` directory.
    - Committed changes with git hash c7ad0e9 and commit message: "feat: implement -m flag in cli.py".
    - Committed changes with git hash 5564920 and commit message: "test: Add unit tests for cli.py in the tests directory".
+
+3. **LLM Integration**
+   - Implemented the `get_commands` method in `src/llm.py` to send the `user_prompt` to the LLM and receive the `generated_commands`.
+   - Added debug logs to the `get_commands` method for better traceability.
+   - Committed changes with git hash eb99363 and commit message: "debug: Add debug logs to `get_commands` method".
+   - Added unit tests for the `get_commands` method in `tests/test_llm.py`.
+   - Mocked the `response.response` for the invalid JSON test case and expected a `ValueError` with the specified message.
+   - Committed changes with git hash f2949c9 and commit message: "test: Mock response.response for invalid JSON test and expect ValueError".
+
+This log will be updated as each step is completed.
