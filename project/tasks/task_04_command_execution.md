@@ -39,3 +39,6 @@ Implement the `execute_commands` function in `src/executor.py` to return a list 
 - When one or multiple commands fail during execution, create a `CmdResult` object with the appropriate error message in the `stderr` field and a non-zero `return_code` to indicate failure.
 - Ensure that the function is robust and handles various edge cases, such as empty command lists.
 - Document the configuration method in the `README.md` and `config.yaml` examples.
+
+## TODOs for later
+- Handle large output for commands
