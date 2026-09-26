@@ -7,6 +7,15 @@ logger = logging.getLogger(__name__)
 
 
 class CmdResult(NamedTuple):
+    """
+    Represents the result of a command execution.
+
+    Attributes:
+        command (str): The command that was executed.
+        return_code (int): The return code of the command execution.
+        stdout (str): The standard output of the command.
+        stderr (str): The standard error of the command.
+    """
     command: str
     return_code: int
     stdout: str
@@ -14,11 +23,18 @@ class CmdResult(NamedTuple):
 
 
 def execute_commands(config: dict, valid_commands: list[str]) -> list[CmdResult]:
-    timeout = 10
-    if "timeout" in config:
-        timeout = config.get("timeout")
-    else:
-        logger.debug(f"timeout not configured, defaulting to {timeout}")
+    """
+    Executes a list of valid commands and returns their results.
+
+    Parameters:
+        config (dict): A dictionary containing configuration options.
+        valid_commands (list[str]): A list of validated shell commands to be executed.
+
+    Returns:
+        list[CmdResult]: A list of CmdResult objects, where each object contains the command and its corresponding execution results.
+    """
+    timeout = config.get("timeout", 10)
+    logger.debug(f"Timeout set to {timeout} seconds")
 
     command_outputs = []
     for cmd in valid_commands:
