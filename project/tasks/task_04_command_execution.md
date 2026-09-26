@@ -35,3 +35,4 @@ Implement the `execute_commands` function in `src/executor.py` to return a list 
 ## Notes
 - Ensure that the function is robust and handles various edge cases, such as empty command lists or commands that produce large outputs.
 - Consider adding a configuration option to set the timeout value dynamically.
+- When one or multiple commands fail during execution, create a `CmdResult` object with the appropriate error message in the `stderr` field and a non-zero `return_code` to indicate failure.
