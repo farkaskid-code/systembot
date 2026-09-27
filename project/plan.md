@@ -49,11 +49,13 @@
      - Use `subprocess.run()` with `capture_output=True` and `timeout` to execute each valid command.
      - Capture and return the `command_outputs`.
 
-## 6. Output Analysis
-   - **File:** `src/llm.py`
+## 6. Implement Agent Loop with Tool Calls
+   - **File:** `src/agent.py`
    - **Functionality:**
-     - Send the `command_outputs` back to the LLM for analysis.
-     - Receive and return the `analysis` from the LLM.
+     - Implement an `Agent` class that encapsulates an agent loop using tool calls to execute shell commands one by one.
+     - The `Agent` class will take tool functions as arguments during initialization.
+     - The agent loop will handle tool calls to execute shell commands and send the command outputs back to the LLM for analysis.
+     - The agent loop will continue until the LLM stops requesting tools or reaches the maximum number of turns.
 
 ## 7. Final Output
    - **File:** `src/main.py`
@@ -83,7 +85,7 @@
 2. **LLM Integration** (`src/llm.py`)
 3. **Command Validation** (`src/validator.py`)
 4. **Command Execution** (`src/executor.py`)
-5. **Output Analysis** (`src/llm.py`)
+5. **Implement Agent Loop with Tool Calls** (`src/agent.py`)
 6. **Final Output** (`src/main.py`)
 7. **Testing** (`tests/`)
 8. **Documentation** (`README.md`)
