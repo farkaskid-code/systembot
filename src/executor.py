@@ -1,8 +1,8 @@
 import logging
 import subprocess
+from json import dumps
 from typing import NamedTuple
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -16,65 +16,62 @@ class CmdResult(NamedTuple):
         stdout (str): The standard output of the command.
         stderr (str): The standard error of the command.
     """
+
     command: str
     return_code: int
     stdout: str
     stderr: str
 
+    def json(self) -> str:
+        return dumps(self)
 
-def execute_commands(config: dict, valid_commands: list[str]) -> list[CmdResult]:
+
+def execute_command(cmd: str) -> str:
     """
-    Executes a list of valid commands and returns their results.
+    Executes a shell command and returns its result.
 
     Parameters:
-        config (dict): A dictionary containing configuration options.
-        valid_commands (list[str]): A list of validated shell commands to be executed.
+        cmd (str): The shell command to be executed.
 
     Returns:
-        list[CmdResult]: A list of CmdResult objects, where each object contains the command and its corresponding execution results.
+        str: A string representing JSON serialization of an object what will contain information about the command execution.
+        Following will be the keys,
+        "command" - The command that was executed.
+        "return_code" - The return code of the command execution.
+        "stdout" - The standard output of the command.
+        "stderr" - The standard error of the command.
     """
-    timeout = config.get("timeout", 10)
+    timeout = 10
     logger.debug(f"Timeout set to {timeout} seconds")
-
-    command_outputs = []
-    for cmd in valid_commands:
-        logger.info(f"Executing command '{cmd}'")
-        try:
-            result = subprocess.run(
-                cmd,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                check=False,
-            )
-            command_outputs.append(
-                CmdResult(
-                    command=cmd,
-                    return_code=result.returncode,
-                    stdout=result.stdout,
-                    stderr=result.stderr,
-                )
-            )
-            logger.info(
-                f"Command '{cmd}' successfully executed with return_code: {result.returncode}"
-            )
-        except subprocess.TimeoutExpired as e:
-            logger.error(f"Command '{cmd}' timed out because: {e}")
-            command_outputs.append(
-                CmdResult(
-                    command=cmd, return_code=1, stdout="", stderr="Command timed out\n"
-                )
-            )
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Command '{cmd}' failed because: {e}")
-            command_outputs.append(
-                CmdResult(
-                    command=cmd,
-                    return_code=e.returncode,
-                    stdout=e.stdout,
-                    stderr=e.stderr,
-                )
-            )
-
-    return command_outputs
+    logger.info(f"Executing command '{cmd}'")
+    try:
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        return CmdResult(
+            command=cmd,
+            return_code=result.returncode,
+            stdout=result.stdout,
+            stderr=result.stderr,
+        ).json()
+        logger.info(
+            f"Command '{cmd}' successfully executed with return_code: {result.returncode}"
+        )
+    except subprocess.TimeoutExpired as e:
+        logger.error(f"Command '{cmd}' timed out because: {e}")
+        return CmdResult(
+            command=cmd, return_code=1, stdout="", stderr="Command timed out\n"
+        ).json()
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Command '{cmd}' failed because: {e}")
+        return CmdResult(
+            command=cmd,
+            return_code=e.returncode,
+            stdout=e.stdout,
+            stderr=e.stderr,
+        ).json()
