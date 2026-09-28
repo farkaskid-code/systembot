@@ -52,6 +52,7 @@ def execute(config: dict, cmd: str) -> str:
     log.info(f"Validating commands in: {cmd}")
     invalid_commands = validate_command(config=config, command=cmd)
     if len(invalid_commands):
+        log.warning(f"Following commands are blacklisted: {invalid_commands}")
         result = CmdResult(
             command=cmd,
             return_code=130,

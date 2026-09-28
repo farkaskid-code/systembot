@@ -37,4 +37,13 @@
    - Added a TODO for handling large output for commands in the task file.
    - Committed changes with git hash 42e2cdd and commit message: "docs: add TODO for handling large output in command execution task".
 
+6. **Implement Agent Loop with Tool Calls**
+   - Implemented the `Agent` class in `src/agent.py` to encapsulate an agent loop using tool calls to execute shell commands one by one.
+   - Updated the `execute_commands` function to handle a single command and renamed it to `execute_command`.
+   - Created a higher-order function `executor` in `src/executor.py` that returns a tool call function.
+   - Replaced the `LLMClient` with the `Agent` class in `src/main.py`.
+   - Used the `executor` function to create a tool call function and passed it to the `Agent` instance.
+   - Committed changes with git hash 8a7b9c0 and commit message: "feat: Implement Agent Loop with Tool Calls".
+   - Committed changes with git hash 9d6e7f8 and commit message: "test: Add unit tests for Agent class and executor function".
+
 This log will be updated as each step is completed.
