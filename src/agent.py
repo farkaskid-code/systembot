@@ -4,7 +4,7 @@ from os import getenv
 
 from ollama import Client
 
-from executor import CmdResult, execute_command
+from executor import execute_command
 from validator import validate_command
 
 log = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class Bashbot:
 
     def run(self, query: str) -> str:
         client = Client(host=getenv("OLLAMA_API_BASE"))
-        tool_from_name = {tool.__name__: tool for tool in self.tools}
+        tool_from_name = {execute_command.__name__: execute_command}
         messages = [
             {"role": "system", "content": self.prompt},
             {"role": "user", "content": query},
