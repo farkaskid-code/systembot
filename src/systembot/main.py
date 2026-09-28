@@ -24,8 +24,5 @@ def main():
     bashbot = Bashbot(config=get_config())
     response = bashbot.run(sys.argv[1])
     console.print("----\n", style="bold")
-    console.print(f"[SYSTEMBOT]: {response}", style="bold green")
-
-
-if __name__ == "__main__":
-    main()
+    console.print("[SYSTEMBOT]: ", style="bold green")
+    console.print(response)

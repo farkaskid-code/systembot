@@ -39,18 +39,22 @@ class Bashbot:
         ]
 
         for turn in range(self.max_turns):
-            try:
-                response = client.chat(
-                    model=self.model,
-                    messages=messages,
-                    tools=self.tools,
-                    options={"num_ctx": self.num_ctx},
-                )
-                log.debug(f"Response from model (turn {turn + 1}): {response.message}")
-                messages.append(response.message)
-            except Exception as e:
-                log.error(f"Failed to call model because of: {e}")
-                continue
+            with console.status("[bold green]Thinking...") as status:
+                try:
+                    response = client.chat(
+                        model=self.model,
+                        messages=messages,
+                        tools=self.tools,
+                        options={"num_ctx": self.num_ctx},
+                    )
+                    status.update("Done")
+                    log.debug(
+                        f"Response from model (turn {turn + 1}): {response.message}"
+                    )
+                    messages.append(response.message)
+                except Exception as e:
+                    log.error(f"Failed to call model because of: {e}")
+                    continue
 
             if not response.message.tool_calls:
                 log.info("No tool calls required, returning model response.")
