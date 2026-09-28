@@ -5,3 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["ollama>=0.6.2", "pyyaml>=6.0.3", "rich>=15.0.0"]
+
+[project.scripts]
+systembot = "systembot.main:main"
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"

@@ -2,8 +2,8 @@ import logging
 import sys
 from pathlib import Path
 
-from agent import Bashbot
-from config import get_config
+from .agent import Bashbot
+from .config import get_config
 
 log = logging.getLogger(__name__)
 

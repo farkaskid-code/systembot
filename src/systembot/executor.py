@@ -3,7 +3,9 @@ import subprocess
 from json import dumps
 from typing import NamedTuple
 
-logger = logging.getLogger(__name__)
+from .validator import validate_command
+
+log = logging.getLogger(__name__)
 
 
 class CmdResult(NamedTuple):
@@ -41,9 +43,24 @@ def execute_command(cmd: str) -> str:
         "stdout" - The standard output of the command.
         "stderr" - The standard error of the command.
     """
-    timeout = 10
-    logger.debug(f"Timeout set to {timeout} seconds")
-    logger.info(f"Executing command '{cmd}'")
+
+
+def execute(config: dict, cmd: str) -> str:
+    timeout = config.get("command_timeout", 10)
+    log.debug(f"Timeout set to {timeout} seconds")
+
+    log.info(f"Validating commands in: {cmd}")
+    invalid_commands = validate_command(config=config, command=cmd)
+    if len(invalid_commands):
+        result = CmdResult(
+            command=cmd,
+            return_code=130,
+            stderr="Following commands are blacklisted: {invalid_commands}",
+            stdout="",
+        )
+        return result.json()
+
+    log.info(f"Executing command '{cmd}'")
     try:
         result = subprocess.run(
             cmd,
@@ -59,16 +76,16 @@ def execute_command(cmd: str) -> str:
             stdout=result.stdout,
             stderr=result.stderr,
         ).json()
-        logger.info(
+        log.info(
             f"Command '{cmd}' successfully executed with return_code: {result.returncode}"
         )
     except subprocess.TimeoutExpired as e:
-        logger.error(f"Command '{cmd}' timed out because: {e}")
+        log.error(f"Command '{cmd}' timed out because: {e}")
         return CmdResult(
             command=cmd, return_code=1, stdout="", stderr="Command timed out\n"
         ).json()
     except subprocess.CalledProcessError as e:
-        logger.error(f"Command '{cmd}' failed because: {e}")
+        log.error(f"Command '{cmd}' failed because: {e}")
         return CmdResult(
             command=cmd,
             return_code=e.returncode,

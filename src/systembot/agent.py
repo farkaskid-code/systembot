@@ -1,11 +1,9 @@
 import logging
 from collections.abc import Callable
-from os import getenv
 
 from ollama import Client
 
-from executor import execute_command
-from validator import validate_command
+from .executor import execute, execute_command
 
 log = logging.getLogger(__name__)
 
@@ -28,19 +26,15 @@ class Bashbot:
             "When user requests a query, you will respond in brief and to the point messages."
         )
 
+        self.host = config.get("model", {}).get("host")
         self.model = config.get("model", {}).get("name")
         self.num_ctx = config.get("model", {}).get("num_ctx", 4096)
         self.tools = [execute_command]
         self.max_turns = config.get("max_turns", 10)
-
-        if not self.model:
-            raise ConfigError("Model information mising")
-
         self.config = config
 
     def run(self, query: str) -> str:
-        client = Client(host=getenv("OLLAMA_API_BASE"))
-        tool_from_name = {execute_command.__name__: execute_command}
+        client = Client(host=self.host)
         messages = [
             {"role": "system", "content": self.prompt},
             {"role": "user", "content": query},
@@ -60,36 +54,23 @@ class Bashbot:
                 return response.message.content
 
             for call in response.message.tool_calls:
-                tool = tool_from_name.get(call.function.name)
-
-                if tool:
-                    invalid_commands = validate_command(
-                        config=self.config,
-                        command=call.function.arguments.get("cmd", ""),
+                if call.function.name == execute_command.__name__:
+                    log.info(
+                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
                     )
-                    if len(invalid_commands) == 0:
-                        log.info(
-                            f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
-                        )
-                        print(
-                            f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
-                        )
-                        result = tool(**call.function.arguments)
-                        messages.append(
-                            {
-                                "role": "tool",
-                                "tool_name": call.function.name,
-                                "content": result,
-                            }
-                        )
-                    else:
-                        messages.append(
-                            {
-                                "role": "tool",
-                                "tool_name": call.function.name,
-                                "content": f"Following commands are blacklisted: {invalid_commands}",
-                            }
-                        )
+                    print(
+                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
+                    )
+                    result = execute(
+                        config=self.config, cmd=call.function.arguments.get("cmd", "")
+                    )
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_name": call.function.name,
+                            "content": result,
+                        }
+                    )
                 else:
                     messages.append(
                         {
