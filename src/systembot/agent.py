@@ -66,7 +66,7 @@ class Bashbot:
                     log.info(
                         f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
                     )
-                    console.print("Executing: ", end="", style="yellow")
+                    console.print("Running: ", end="", style="yellow")
                     console.print(
                         Syntax(code=call.function.arguments.get("cmd"), lexer="bash")
                     )
