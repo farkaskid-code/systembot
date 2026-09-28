@@ -3,6 +3,7 @@ from collections.abc import Callable
 
 from ollama import Client
 from rich.console import Console
+from rich.syntax import Syntax
 
 from .executor import execute, execute_command
 
@@ -39,7 +40,7 @@ class Bashbot:
         ]
 
         for turn in range(self.max_turns):
-            with console.status("[bold green]Thinking...") as status:
+            with console.status("[green]Thinking...") as status:
                 try:
                     response = client.chat(
                         model=self.model,
@@ -65,9 +66,9 @@ class Bashbot:
                     log.info(
                         f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
                     )
+                    console.print("Executing: ", end="", style="yellow")
                     console.print(
-                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}",
-                        style="bold yellow",
+                        Syntax(code=call.function.arguments.get("cmd"), lexer="bash")
                     )
                     result = execute(
                         config=self.config, cmd=call.function.arguments.get("cmd", "")

@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 from rich.console import Console
+from rich.markdown import Markdown
 
 from .agent import Bashbot
 from .config import get_config
@@ -25,4 +26,4 @@ def main():
     response = bashbot.run(sys.argv[1])
     console.print("----\n", style="bold")
     console.print("[SYSTEMBOT]: ", style="bold green")
-    console.print(response)
+    console.print(Markdown(response))
