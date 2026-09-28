@@ -1,13 +1,14 @@
 import logging
 from collections.abc import Callable
-from rich.console import Console
 
 from ollama import Client
+from rich.console import Console
 
 from .executor import execute, execute_command
 
 log = logging.getLogger(__name__)
 console = Console()
+
 
 class Bashbot:
     model: str

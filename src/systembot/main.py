@@ -1,6 +1,7 @@
 import logging
 import sys
 from pathlib import Path
+
 from rich.console import Console
 
 from .agent import Bashbot
@@ -8,6 +9,7 @@ from .config import get_config
 
 log = logging.getLogger(__name__)
 console = Console()
+
 
 def main():
     data_path = Path(Path.home() / ".systembot")
