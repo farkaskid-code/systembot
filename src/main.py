@@ -5,7 +5,7 @@ from yaml import safe_load
 
 from agent import Bashbot
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 

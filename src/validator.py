@@ -1,29 +1,27 @@
 import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
-def validate_commands(config: dict, generated_commands: list[str]) -> list[str]:
-    logger.debug("Validating commands against blacklist")
+def validate_command(config: dict, command: str) -> list[str]:
+    commands = command.strip().split("&&")
+    log.debug("Validating commands against blacklist")
 
     if "blacklist" not in config:
-        logger.error("Faulty config file")
+        log.error("No commands are blacklisted, consider adding some")
 
-    blacklist = config.get("blacklist", [])
+    blacklist = config.get("blacklist", ["rm", "shutdown", "reboot", "dd", "mkfs"])
 
-    valid_commands = []
-    for command in generated_commands:
-        parts = command.split()
+    invalid_commands = []
+    for cmd in commands:
+        parts = cmd.split()
         if not parts:
             continue
 
-        cmd = parts[0]
-        if cmd in blacklist:
-            logger.error(f"Command '{cmd}' is blacklisted and will be skipped.")
-            continue
+        cmd_bin = parts[0]
+        if cmd_bin in blacklist:
+            log.error(f"Command '{cmd_bin}' is blacklisted and will be skipped.")
+            invalid_commands.append(cmd_bin)
 
-        valid_commands.append(command)
-
-    logger.debug(f"Validated commands: {valid_commands}")
-    return valid_commands
+    log.debug(f"Invalid commands: {invalid_commands}")
+    return invalid_commands

@@ -7,3 +7,4 @@ blacklist:
 
 model:
   name: qwen3:14b
+  num_ctx: 16384

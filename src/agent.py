@@ -4,7 +4,8 @@ from os import getenv
 
 from ollama import Client
 
-from executor import execute_command
+from executor import CmdResult, execute_command
+from validator import validate_command
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class Bashbot:
         )
 
         self.model = config.get("model", {}).get("name")
+        self.num_ctx = config.get("model", {}).get("num_ctx", 4096)
         self.tools = [execute_command]
         self.max_turns = config.get("max_turns", 10)
 
@@ -46,7 +48,10 @@ class Bashbot:
 
         for _ in range(self.max_turns):
             response = client.chat(
-                model=self.model, messages=messages, tools=self.tools
+                model=self.model,
+                messages=messages,
+                tools=self.tools,
+                options={"num_ctx": self.num_ctx},
             )
             log.debug(f"Response: {response.message}")
             messages.append(response.message)
@@ -58,20 +63,33 @@ class Bashbot:
                 tool = tool_from_name.get(call.function.name)
 
                 if tool:
-                    log.info(
-                        f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
+                    invalid_commands = validate_command(
+                        config=self.config,
+                        command=call.function.arguments.get("cmd", ""),
                     )
-                    print(
-                        f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
-                    )
-                    result = tool(**call.function.arguments)
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_name": call.function.name,
-                            "content": result,
-                        }
-                    )
+                    if len(invalid_commands) == 0:
+                        log.info(
+                            f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
+                        )
+                        print(
+                            f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
+                        )
+                        result = tool(**call.function.arguments)
+                        messages.append(
+                            {
+                                "role": "tool",
+                                "tool_name": call.function.name,
+                                "content": result,
+                            }
+                        )
+                    else:
+                        messages.append(
+                            {
+                                "role": "tool",
+                                "tool_name": call.function.name,
+                                "content": f"Following commands are blacklisted: {invalid_commands}",
+                            }
+                        )
                 else:
                     messages.append(
                         {
