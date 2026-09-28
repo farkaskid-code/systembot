@@ -1,27 +1,30 @@
 import logging
 import sys
 
-from agent import Agent
-from executor import execute_command
+from yaml import safe_load
+
+from agent import Bashbot
 
 logging.basicConfig(level=logging.ERROR)
+log = logging.getLogger(__name__)
+
+
+def load_config() -> dict:
+    try:
+        with open("config.yaml", "r") as config_file:
+            log.debug(f"Reading the configuration from: {config_file.name}")
+            config = safe_load(config_file)
+        return config
+    except FileNotFoundError as e:
+        log.error(f"Config file not found: {e}")
+        sys.exit(1)
 
 
 def main():
-    cli_agent_system_prompt = (
-        "You are a system bot who will interact with the system using the terminal."
-        "When you need information to gather information or perform as task, you will be appropriate executing shell commands"
-        "You will have access to a tool for executing a shell command"
-        "When user requests a query, you will respond in brief and to the point messages."
-    )
-
-    cli_agent = Agent(
-        name="systembot",
-        model="qwen3:14b",
-        prompt=cli_agent_system_prompt,
-        tools=[execute_command],
-    )
-    print(cli_agent.run(sys.argv[1]))
+    bashbot = Bashbot(config=load_config())
+    response = bashbot.run(sys.argv[1])
+    print("----\n")
+    print(f"[SYSTEMBOT]: {response}")
 
 
 if __name__ == "__main__":

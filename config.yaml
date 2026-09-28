@@ -4,3 +4,6 @@ blacklist:
   - reboot
   - dd
   - mkfs
+
+model:
+  name: qwen3:14b

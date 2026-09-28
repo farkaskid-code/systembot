@@ -1,19 +1,40 @@
 import logging
 from collections.abc import Callable
 from os import getenv
-from typing import NamedTuple
 
 from ollama import Client
+
+from executor import execute_command
 
 log = logging.getLogger(__name__)
 
 
-class Agent(NamedTuple):
-    name: str
+class ConfigError(RuntimeError):
+    pass
+
+
+class Bashbot:
     model: str
     prompt: str
     tools: list[Callable]
-    max_turns: int = 5
+    max_turns: int = 10
+
+    def __init__(self, config: dict) -> None:
+        self.prompt = (
+            "You are a system bot who will interact with the system using the terminal."
+            "When you need information to gather information or perform as task, you will be appropriate executing shell commands"
+            "You will have access to a tool for executing a shell command"
+            "When user requests a query, you will respond in brief and to the point messages."
+        )
+
+        self.model = config.get("model", {}).get("name")
+        self.tools = [execute_command]
+        self.max_turns = config.get("max_turns", 10)
+
+        if not self.model:
+            raise ConfigError("Model information mising")
+
+        self.config = config
 
     def run(self, query: str) -> str:
         client = Client(host=getenv("OLLAMA_API_BASE"))
@@ -38,6 +59,9 @@ class Agent(NamedTuple):
 
                 if tool:
                     log.info(
+                        f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
+                    )
+                    print(
                         f"Calling tool: {tool.__name__} with args: {call.function.arguments}"
                     )
                     result = tool(**call.function.arguments)
