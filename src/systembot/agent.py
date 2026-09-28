@@ -1,12 +1,13 @@
 import logging
 from collections.abc import Callable
+from rich.console import Console
 
 from ollama import Client
 
 from .executor import execute, execute_command
 
 log = logging.getLogger(__name__)
-
+console = Console()
 
 class Bashbot:
     model: str
@@ -17,9 +18,9 @@ class Bashbot:
     def __init__(self, config: dict) -> None:
         self.prompt = (
             "You are a system bot who will interact with the system using the terminal."
-            "When you need information to gather information or perform as task, you will be appropriate executing shell commands"
-            "You will have access to a tool for executing a shell command"
-            "When user requests a query, you will respond in brief and to the point messages."
+            "When you need information to gather information or perform a task, you will appropriately execute shell commands."
+            "You will have access to a tool for executing a shell command."
+            "When the user requests a query, you will respond in brief and to the point messages."
         )
 
         self.host = config.get("model", {}).get("host")
@@ -59,8 +60,9 @@ class Bashbot:
                     log.info(
                         f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
                     )
-                    print(
-                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
+                    console.print(
+                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}",
+                        style="bold yellow",
                     )
                     result = execute(
                         config=self.config, cmd=call.function.arguments.get("cmd", "")

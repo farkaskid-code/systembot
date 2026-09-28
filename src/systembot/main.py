@@ -1,12 +1,13 @@
 import logging
 import sys
 from pathlib import Path
+from rich.console import Console
 
 from .agent import Bashbot
 from .config import get_config
 
 log = logging.getLogger(__name__)
-
+console = Console()
 
 def main():
     data_path = Path(Path.home() / ".systembot")
@@ -20,8 +21,8 @@ def main():
 
     bashbot = Bashbot(config=get_config())
     response = bashbot.run(sys.argv[1])
-    print("----\n")
-    print(f"[SYSTEMBOT]: {response}")
+    console.print("----\n", style="bold")
+    console.print(f"[SYSTEMBOT]: {response}", style="bold green")
 
 
 if __name__ == "__main__":
