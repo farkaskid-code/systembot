@@ -36,7 +36,7 @@ class Bashbot:
             {"role": "user", "content": query},
         ]
 
-        for _ in range(self.max_turns):
+        for turn in range(self.max_turns):
             try:
                 response = client.chat(
                     model=self.model,
@@ -44,13 +44,14 @@ class Bashbot:
                     tools=self.tools,
                     options={"num_ctx": self.num_ctx},
                 )
-                log.debug(f"Response: {response.message}")
+                log.debug(f"Response from model (turn {turn + 1}): {response.message}")
                 messages.append(response.message)
             except Exception as e:
                 log.error(f"Failed to call model because of: {e}")
                 continue
 
             if not response.message.tool_calls:
+                log.info("No tool calls required, returning model response.")
                 return response.message.content
 
             for call in response.message.tool_calls:
@@ -72,6 +73,7 @@ class Bashbot:
                         }
                     )
                 else:
+                    log.warning(f"Tool not found: {call.function.name}")
                     messages.append(
                         {
                             "role": "tool",
