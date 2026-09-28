@@ -8,10 +8,6 @@ from .executor import execute, execute_command
 log = logging.getLogger(__name__)
 
 
-class ConfigError(RuntimeError):
-    pass
-
-
 class Bashbot:
     model: str
     prompt: str
@@ -41,14 +37,18 @@ class Bashbot:
         ]
 
         for _ in range(self.max_turns):
-            response = client.chat(
-                model=self.model,
-                messages=messages,
-                tools=self.tools,
-                options={"num_ctx": self.num_ctx},
-            )
-            log.debug(f"Response: {response.message}")
-            messages.append(response.message)
+            try:
+                response = client.chat(
+                    model=self.model,
+                    messages=messages,
+                    tools=self.tools,
+                    options={"num_ctx": self.num_ctx},
+                )
+                log.debug(f"Response: {response.message}")
+                messages.append(response.message)
+            except Exception as e:
+                log.error(f"Failed to call model because of: {e}")
+                continue
 
             if not response.message.tool_calls:
                 return response.message.content
@@ -79,3 +79,6 @@ class Bashbot:
                             "content": "Tool not found",
                         }
                     )
+
+        log.error(f"Failed to call the model after {self.max_turns} tries")
+        return "Failed to call the model after {self.max_turns} tries"
