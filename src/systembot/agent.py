@@ -1,5 +1,5 @@
 import logging
-from collections.abc import Callable
+import platform
 
 from ollama import Client
 from rich.console import Console
@@ -12,25 +12,21 @@ console = Console()
 
 
 class Bashbot:
-    model: str
-    prompt: str
-    tools: list[Callable]
-    max_turns: int = 10
+    prompt = f"""
+        - You are a system bot who will interact with the system using the CLI.
+        - You will have access to a tool for executing a command which you can call multiple times.
+        - When you need to gather information or perform a task, you will execute appropriate commands.
+        - When the user requests a query, you will execute the needed commands and then respond in brief and to the point messages.
+        - You are working on: {platform.system()}, generate commands accordingly.
+    """
 
     def __init__(self, config: dict) -> None:
-        self.prompt = (
-            "You are a system bot who will interact with the system using the terminal."
-            "When you need information to gather information or perform a task, you will appropriately execute shell commands."
-            "You will have access to a tool for executing a shell command."
-            "When the user requests a query, you will respond in brief and to the point messages."
-        )
-
         self.host = config.get("model", {}).get("host")
         self.model = config.get("model", {}).get("name")
         self.num_ctx = config.get("model", {}).get("num_ctx", 4096)
-        self.tools = [execute_command]
         self.max_turns = config.get("max_turns", 10)
         self.config = config
+        self.tools = [execute_command]
 
     def run(self, query: str) -> str:
         client = Client(host=self.host)
@@ -91,4 +87,4 @@ class Bashbot:
                     )
 
         log.error(f"Failed to call the model after {self.max_turns} tries")
-        return "Failed to call the model after {self.max_turns} tries"
+        return f"Failed to call the model after {self.max_turns} tries"
