@@ -1,4 +1,4 @@
-# systembot CLI Tool
+# systembot
 
 ## Overview
 `systembot` is a CLI tool that acts as a bridge between natural language instructions and shell execution, using a local LLM for command generation and analysis. It ensures safe execution of commands by validating them against a configurable blacklist.
@@ -22,16 +22,17 @@
 ## Configuration
 Create a configuration file at `~/.systembot/config.yaml` with the following content:
 ```yaml
-blacklist:
+blacklist: # Optional but recommended for safety guardrails
   - rm
   - shutdown
   - reboot
   - dd
   - mkfs
 
-model:
-  name: qwen3:14b
-  num_ctx: 16384
+model: # Required: it needs an Ollama server to work
+  host: http://{ollama-server-host}:11434
+  name: qwen3:14b # A model that supports tool calling
+  num_ctx: 16384 # Optional
 ```
 
 ## Usage
@@ -52,6 +53,5 @@ $ systembot "why is the system feeling slow?"
 ```
 
 ## Notes
-- The tool is designed to be agent-agnostic and safe.
 - Commands are validated before execution to prevent blacklisted commands from running.
-- The tool logs executed commands and results for auditing purposes.
+- The tool logs executed commands and results for auditing purposes at `~/.systembot/app.log`
