@@ -4,6 +4,7 @@ from pathlib import Path
 
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.rule import Rule
 
 from .agent import Bashbot
 from .config import get_config
@@ -24,6 +25,6 @@ def main():
 
     bashbot = Bashbot(config=get_config())
     response = bashbot.run(sys.argv[1])
-    console.print("----\n", style="bold")
+    console.print(Rule())
     console.print("[SYSTEMBOT]: ", style="bold green")
     console.print(Markdown(response))

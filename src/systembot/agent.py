@@ -3,7 +3,6 @@ import platform
 
 from ollama import Client
 from rich.console import Console
-from rich.syntax import Syntax
 
 from .executor import execute, execute_command
 
@@ -63,12 +62,9 @@ class Bashbot:
                         f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
                     )
                     console.print("Running: ", end="", style="yellow")
-                    console.print(
-                        Syntax(code=call.function.arguments.get("cmd"), lexer="bash")
-                    )
-                    result = execute(
-                        config=self.config, cmd=call.function.arguments.get("cmd", "")
-                    )
+                    command = call.function.arguments.get("cmd", None)
+                    console.print(command)
+                    result = execute(config=self.config, cmd=command)
                     messages.append(
                         {
                             "role": "tool",
