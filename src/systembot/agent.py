@@ -63,30 +63,24 @@ class Bashbot:
                 return response.message.content
 
             for call in response.message.tool_calls:
-                if call.function.name == execute_command.__name__:
+                if call["function"]["name"] == execute_command.__name__:
                     log.info(
-                        f"Calling tool: {execute_command.__name__} with args: {call.function.arguments}"
+                        f"Calling tool: {execute_command.__name__} with args: {call['function']['arguments']}"
                     )
                     console.print("Running: ", end="", style="yellow")
-                    command = call.function.arguments.get("cmd", None)
+                    command = call["function"]["arguments"]["cmd"]
                     console.print(command)
                     result = execute(config=self.config, cmd=command)
                     messages.append(
                         {
                             "role": "tool",
-                            "tool_name": call.function.name,
+                            "tool_name": call["function"]["name"],
                             "content": result,
                         }
                     )
                 else:
-                    log.warning(f"Tool not found: {call.function.name}")
-                    messages.append(
-                        {
-                            "role": "tool",
-                            "tool_name": call.function.name,
-                            "content": "Tool not found",
-                        }
-                    )
+                    log.warning(f"Tool not found: {call['function']['name']}")
+                    return f"Tool not found: {call['function']['name']}"
 
         log.error(f"Failed to call the model after {self.max_turns} tries")
         return f"Failed to call the model after {self.max_turns} tries"

@@ -1,7 +1,9 @@
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
 from src.systembot.agent import Bashbot
 from src.systembot.config import get_config
+
 
 class TestAgent(unittest.TestCase):
     def setUp(self):
@@ -21,25 +23,30 @@ class TestAgent(unittest.TestCase):
         mock_chat.assert_called_once()
 
     @patch("ollama.Client.chat")
-    @patch("src.systembot.executor.execute")
+    @patch("src.systembot.agent.execute")
     def test_run_with_tool_calls(self, mock_execute, mock_chat):
-        mock_response = Mock()
-        mock_response.message.content = "Executing command"
-        mock_response.message.tool_calls = [
+        mock_response_tool_request = Mock()
+        mock_response_tool_request.message.content = ""
+        mock_response_tool_request.message.tool_calls = [
             {
                 "function": {
                     "name": "execute_command",
-                    "arguments": {"cmd": "echo Hello"}
+                    "arguments": {"cmd": "echo Hello"},
                 }
             }
         ]
-        mock_chat.return_value = mock_response
+
+        mock_response = Mock()
+        mock_response.message.content = "Hello"
+        mock_response.message.tool_calls = None
+
+        mock_chat.side_effect = [mock_response_tool_request, mock_response]
         mock_execute.return_value = "Hello"
 
         result = self.agent.run("What is the weather?")
 
         self.assertEqual(result, "Hello")
-        mock_chat.assert_called_once()
+        self.assertEqual(mock_chat.call_count, 2)
         mock_execute.assert_called_once_with(config=self.config, cmd="echo Hello")
 
     @patch("ollama.Client.chat")
@@ -50,13 +57,13 @@ class TestAgent(unittest.TestCase):
             {
                 "function": {
                     "name": "execute_command",
-                    "arguments": {"cmd": "echo Hello"}
+                    "arguments": {"cmd": "echo Hello"},
                 }
             }
         ]
         mock_chat.return_value = mock_response
 
-        with patch.object(self.agent, 'max_turns', new=1):
+        with patch.object(self.agent, "max_turns", new=1):
             result = self.agent.run("What is the weather?")
 
         self.assertEqual(result, "Failed to call the model after 1 tries")
@@ -70,7 +77,7 @@ class TestAgent(unittest.TestCase):
             {
                 "function": {
                     "name": "non_existent_tool",
-                    "arguments": {"cmd": "echo Hello"}
+                    "arguments": {"cmd": "echo Hello"},
                 }
             }
         ]
@@ -78,8 +85,9 @@ class TestAgent(unittest.TestCase):
 
         result = self.agent.run("What is the weather?")
 
-        self.assertEqual(result, "Tool not found")
+        self.assertEqual(result, "Tool not found: non_existent_tool")
         mock_chat.assert_called_once()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
