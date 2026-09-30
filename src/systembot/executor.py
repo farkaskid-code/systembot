@@ -56,7 +56,7 @@ def execute(config: dict, cmd: str) -> str:
         result = CmdResult(
             command=cmd,
             return_code=130,
-            stderr="Following commands are blacklisted: {invalid_commands}",
+            stderr=f"Following commands are blacklisted: {invalid_commands}",
             stdout="",
         )
         return result.json()
