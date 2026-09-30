@@ -47,7 +47,13 @@ class Bashbot:
                     log.debug(
                         f"Response from model (turn {turn + 1}): {response.message}"
                     )
-                    messages.append(response.message)
+                    messages.append(
+                        {
+                            "role": "assistant",
+                            "content": response.message.content,
+                            "tool_calls": response.message.tool_calls,
+                        }
+                    )
                 except Exception as e:
                     log.error(f"Failed to call model because of: {e}")
                     continue
