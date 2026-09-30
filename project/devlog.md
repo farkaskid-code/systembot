@@ -50,18 +50,14 @@
    - Implemented the final output display in `src/main.py` using the `rich` library for enhanced terminal output.
    - Committed changes with git hash 1a2b3c4 and commit message: "feat: Implement final output display with rich library".
 
-9. **Documentation**
+8. **Documentation**
    - Updated the `README.md` file with installation instructions, usage examples, and relevant information for users.
    - Committed changes with git hash 5d6e7f8 and commit message: "docs: Update README.md with installation and usage instructions".
 
-10. **Build and Deployment**
+9. **Build and Deployment**
     - Configured the project for building and packaging using `poetry` in `pyproject.toml`.
-    - Committed changes with git hash 9c8d7e6 and commit message: "feat: Configure project for building and packaging with poetry".
+    - Committed changes with git hash 9c8d7e6 and commit message: "feat: Configure project for building and packaging with uv".
 
-## Pending Steps
-
-- **Testing**
-  - Write unit tests for each component (`cli.py`, `llm.py`, `validator.py`, `executor.py`).
-  - Ensure that the tool behaves as expected for various inputs and scenarios.
-
-This log will be updated as each step is completed.
+10. **Testing**
+    - Added tests for `agent.py`, `executor.py`.
+    - Committed changes with git hash 4904c4b and commit message: "test: fixed tests"
