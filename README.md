@@ -35,7 +35,8 @@ blacklist: # Optional but recommended for safety guardrails
   - mkfs
 
 logging: # Optional
-  level: INFO # Default value is INFO
+  level: INFO # Options are: [NOTSET, DEBUG, INFO, WARNING, ERROR, FATAL], increasing order of severity. Defaults INFO
+  mode: w # Options are: [w, a], meaning write, append. Defaults to w.
 ```
 
 ## Usage
