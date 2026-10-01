@@ -19,11 +19,16 @@ def main():
     if not data_path.exists():
         data_path.mkdir()
 
-    logging.basicConfig(
-        filename=Path(data_path / "app.log"), filemode="w", level=logging.INFO
+    config = get_config()
+    log_level = (
+        config.get("logging").get("level", "INFO") if "logging" in config else "INFO"
     )
 
-    bashbot = Bashbot(config=get_config())
+    logging.basicConfig(
+        filename=Path(data_path / "app.log"), filemode="w", level=log_level
+    )
+
+    bashbot = Bashbot(config=config)
     response = bashbot.run(sys.argv[1])
     console.print(Rule())
     console.print("[SYSTEMBOT]: ", style="bold green")
