@@ -6,7 +6,7 @@
 ## Prerequisites
 - Ollama server running with the desired model.
 - Python 3.x installed.
-- UV package manager installed.
+- [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager installed.
 
 ## Installation
 1. Clone the repository:
@@ -22,6 +22,11 @@
 ## Configuration
 Create a configuration file at `~/.systembot/config.yaml` with the following content:
 ```yaml
+model: # Required: it needs an Ollama server to work
+  host: http://{ollama-server-host}:11434
+  name: qwen3:14b # A model that supports tool calling
+  num_ctx: 16384 # Optional
+
 blacklist: # Optional but recommended for safety guardrails
   - rm
   - shutdown
@@ -29,10 +34,8 @@ blacklist: # Optional but recommended for safety guardrails
   - dd
   - mkfs
 
-model: # Required: it needs an Ollama server to work
-  host: http://{ollama-server-host}:11434
-  name: qwen3:14b # A model that supports tool calling
-  num_ctx: 16384 # Optional
+logging: # Optional
+  level: INFO # Default value is INFO
 ```
 
 ## Usage
@@ -53,5 +56,6 @@ $ systembot "why is the system feeling slow?"
 ```
 
 ## Notes
+- Platform agnostic, will work on Linux, Windows and Mac OS.
 - Commands are validated before execution to prevent blacklisted commands from running.
 - The tool logs executed commands and results for auditing purposes at `~/.systembot/app.log`
