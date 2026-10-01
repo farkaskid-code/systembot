@@ -20,12 +20,16 @@ def main():
         data_path.mkdir()
 
     config = get_config()
-    log_level = (
-        config.get("logging").get("level", "INFO") if "logging" in config else "INFO"
-    )
+
+    log_level = "INFO"
+    log_mode = "w"
+
+    if "logging" in config:
+        log_level = config.get("logging").get("level", "INFO")
+        log_mode = config.get("logging").get("mode", "w")
 
     logging.basicConfig(
-        filename=Path(data_path / "app.log"), filemode="w", level=log_level
+        filename=Path(data_path / "app.log"), filemode=log_mode, level=log_level
     )
 
     bashbot = Bashbot(config=config)
