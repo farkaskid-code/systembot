@@ -6,34 +6,39 @@ from rich.console import Console
 from rich.markdown import Markdown
 from rich.rule import Rule
 
+from systembot.cli import parse_args
+
 from .agent import Bashbot
-from .config import get_config
+from .config import create_basic_config, get_config
 
 log = logging.getLogger(__name__)
 console = Console()
 
+DATAPATH = Path(Path.home() / ".systembot")
+
 
 def main():
-    data_path = Path(Path.home() / ".systembot")
+    args = parse_args()
+    config = {}
 
-    if not data_path.exists():
-        data_path.mkdir()
-
-    config = get_config()
-
-    log_level = "INFO"
-    log_mode = "w"
+    if not DATAPATH.exists():
+        DATAPATH.mkdir()
+        config = create_basic_config(args)
+    else:
+        config = get_config()
+        if args.url and args.model:
+            config["model"] = {"host": args.url, "name": args.model}
 
     if "logging" in config:
         log_level = config.get("logging").get("level", "INFO")
         log_mode = config.get("logging").get("mode", "w")
 
     logging.basicConfig(
-        filename=Path(data_path / "app.log"), filemode=log_mode, level=log_level
+        filename=Path(DATAPATH / "app.log"), filemode=log_mode, level=log_level
     )
 
     bashbot = Bashbot(config=config)
-    response = bashbot.run(sys.argv[1])
+    response = bashbot.run(args.query)
     console.print(Rule())
     console.print("[SYSTEMBOT]: ", style="bold green")
     console.print(Markdown(response))
