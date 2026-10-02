@@ -28,6 +28,7 @@ class Bashbot:
         self.tools = [execute_command]
 
     def run(self, query: str) -> str:
+        log.info(f"Using model: {self.model} served from: {self.host}")
         client = Client(host=self.host)
         messages = [
             {"role": "system", "content": self.prompt},
