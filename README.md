@@ -19,8 +19,21 @@
    uv tool install .
    ```
 
-## Configuration
-Create a configuration file at `~/.systembot/config.yaml` with the following content:
+## Getting Started
+You need a Ollama server and a tool calling model for this to work, it's required. Once setup, just run,
+```bash
+systembot -u http://{ollama-server-host}:11434 -m {model-name} "hello"
+```
+
+to do a test run. This will create a basic config file at `~/.systembot/config.yaml`.
+Once the configuration file is there, you don't need to pass the `-u` and `-m` flags.
+Simply go,
+```bash
+sysetmbot "what's my IP?"
+```
+
+## Configuration Reference
+Configuration file is at `~/.systembot/config.yaml` with the following content:
 ```yaml
 model: # Required: it needs an Ollama server to work
   host: http://{ollama-server-host}:11434
@@ -37,6 +50,9 @@ blacklist: # Optional but recommended for safety guardrails
 logging: # Optional
   level: INFO # Options are: [NOTSET, DEBUG, INFO, WARNING, ERROR, FATAL], increasing order of severity. Defaults INFO
   mode: w # Options are: [w, a], meaning write, append. Defaults to w.
+
+max_turns: 8 # Optional. Max turn allowed for the agent loop
+command_timeout: 10 # Optional. Timeout in seconds for shell command execution
 ```
 
 ## Usage
@@ -46,15 +62,15 @@ systembot "natural language prompt"
 ```
 
 ## Example
-```bash
-$ systembot "why is the system feeling slow?"
-[SYSTEM] Running: top -b -n 1
-[SYSTEM] Running: iostat -d 1 2
-[SYSTEM] Running: journalctl --since "24 hours ago"
-[SYSTEM] Analysis:
-- High CPU usage from process 'SomeResourceHog' (PID 1234) is likely causing the slowness
-- Memory was low 24 hours ago, but disk I/O is normal
-```
+### Basic use case:
+General queries about the system, basic tasks.
+
+<img width="1260" height="547" alt="Screenshot From 2026-10-02 18-58-21" src="https://github.com/user-attachments/assets/df3a2fbc-653a-4f16-93b4-72d19a30e737" />
+
+### Advanced use case:
+You can create instruction / task files for specific workflows and ask `systembot` to execute that workflow.
+
+<img width="1458" height="1032" alt="Screenshot From 2026-10-02 19-07-43" src="https://github.com/user-attachments/assets/5cae99b4-ab4f-435c-8b44-149a6ae4b06e" />
 
 ## Notes
 - Platform agnostic, will work on Linux, Windows and Mac OS.
