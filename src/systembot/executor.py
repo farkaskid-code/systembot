@@ -3,6 +3,8 @@ import subprocess
 from json import dumps
 from typing import NamedTuple
 
+from systembot.config import Config
+
 from .validator import validate_command
 
 log = logging.getLogger(__name__)
@@ -45,8 +47,8 @@ def execute_command(cmd: str) -> str:
     """
 
 
-def execute(config: dict, cmd: str) -> str:
-    timeout = config.get("command_timeout", 10)
+def execute(config: Config, cmd: str) -> str:
+    timeout = config.command_timeout
     log.debug(f"Timeout set to {timeout} seconds")
 
     log.info(f"Validating commands in: {cmd}")
