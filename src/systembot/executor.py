@@ -3,9 +3,8 @@ import subprocess
 from json import dumps
 from typing import NamedTuple
 
-from systembot.config import Config
-
-from .validator import validate_command
+from systembot.config import settings
+from systembot.validator import validate_command
 
 log = logging.getLogger(__name__)
 
@@ -46,13 +45,11 @@ def execute_command(cmd: str) -> str:
         "stderr" - The standard error of the command.
     """
 
-
-def execute(config: Config, cmd: str) -> str:
-    timeout = config.command_timeout
+    timeout = settings.command_timeout
     log.debug(f"Timeout set to {timeout} seconds")
 
     log.info(f"Validating commands in: {cmd}")
-    invalid_commands = validate_command(config=config, command=cmd)
+    invalid_commands = validate_command(command=cmd)
     if len(invalid_commands):
         log.warning(f"Following commands are blacklisted: {invalid_commands}")
         result = CmdResult(

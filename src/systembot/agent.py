@@ -4,9 +4,9 @@ import platform
 from ollama import Client
 from rich.console import Console
 
-from systembot.config import Config
+from systembot.config import settings
 
-from .executor import execute, execute_command
+from .executor import execute_command
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -21,28 +21,27 @@ class Bashbot:
         - You are working on: {platform.system()}, generate commands accordingly.
     """
 
-    def __init__(self, config: Config) -> None:
-        self.config = config
+    def __init__(self) -> None:
         self.tools = [execute_command]
 
     def run(self, query: str) -> str:
         log.info(
-            f"Using model: {self.config.client.model} served from: {self.config.client.host}"
+            f"Using model: {settings.client.model} served from: {settings.client.host}"
         )
-        client = Client(host=self.config.client.host)
+        client = Client(host=settings.client.host)
         messages = [
             {"role": "system", "content": self.prompt},
             {"role": "user", "content": query},
         ]
 
-        for turn in range(self.config.max_turns):
+        for turn in range(settings.max_turns):
             with console.status("[green]Thinking...") as status:
                 try:
                     response = client.chat(
-                        model=self.config.client.model,
+                        model=settings.client.model,
                         messages=messages,
                         tools=self.tools,
-                        options=self.config.client.options,
+                        options=settings.client.options,
                     )
                     status.update("Done")
                     log.debug(
@@ -71,7 +70,7 @@ class Bashbot:
                     console.print("Running: ", end="", style="yellow")
                     command = call["function"]["arguments"]["cmd"]
                     console.print(command)
-                    result = execute(config=self.config, cmd=command)
+                    result = execute_command(cmd=command)
                     messages.append(
                         {
                             "role": "tool",
@@ -83,5 +82,5 @@ class Bashbot:
                     log.warning(f"Tool not found: {call['function']['name']}")
                     return f"Tool not found: {call['function']['name']}"
 
-        log.error(f"Failed to call the model after {self.config.max_turns} tries")
-        return f"Failed to call the model after {self.config.max_turns} tries"
+        log.error(f"Failed to call the model after {settings.max_turns} tries")
+        return f"Failed to call the model after {settings.max_turns} tries"

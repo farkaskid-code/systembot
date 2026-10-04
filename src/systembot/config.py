@@ -1,21 +1,22 @@
 import logging
-import string
-import sys
 from argparse import Namespace
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from sys import exit
 
 from yaml import YAMLError, safe_dump, safe_load
 
+from systembot.cli import parse_args
+
 log = logging.getLogger(__name__)
 
-PATH = Path.home() / ".systembot" / "config.yaml"
+DATAPATH = Path.home() / ".systembot"
 
 
 @dataclass
 class LLMClient:
-    host: string
-    model: string
+    host: str
+    model: str
     options: dict = field(default_factory=dict)
 
 
@@ -86,8 +87,31 @@ class Config:
             raise ConfigError(msg)
 
 
-if __name__ == "__main__":
-    config = Config()
-    config.from_yaml(PATH)
+def bootstrap() -> Config:
+    config_path = DATAPATH / "config.yaml"
+    args = parse_args()
 
-    print(config)
+    config = Config()
+
+    if not DATAPATH.exists():
+        if args.url is None or args.model is None:
+            print(
+                "Initial run. No config file. Pass Ollama host URL with -u and model name with -m"
+            )
+            exit(1)
+        config.from_args(args)
+        DATAPATH.mkdir()
+        config.dump_yaml(config_path)
+    else:
+        config.from_yaml(config_path)
+        config.from_args(args)
+
+    logging.basicConfig(
+        filename=DATAPATH / "app.log",
+        filemode=config.logging.mode,
+        level=config.logging.level,
+    )
+    return config
+
+
+settings = bootstrap()
