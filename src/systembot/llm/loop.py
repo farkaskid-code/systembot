@@ -28,6 +28,7 @@ class ToolLoop:
             except ClientError as e:
                 log.info(f"Turn {turn}: {e}")
                 console.print(e, style="red")
+                return f"{e}"
 
             if len(msg.toolcalls) == 0:
                 log.info(f"Turn {turn}: No toolcalls, existing loop")

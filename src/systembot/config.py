@@ -20,6 +20,7 @@ console = Console()
 class LLMClient:
     host: str
     model: str
+    api_key: str
     options: dict = field(default_factory=dict)
 
 
@@ -58,6 +59,7 @@ class Config:
             self.client = LLMClient(
                 host=model_data["host"],
                 model=model_data["name"],
+                api_key=model_data["api_key"],
                 options=model_data["options"],
             )
 

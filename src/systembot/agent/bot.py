@@ -6,7 +6,7 @@ from pathlib import Path
 from rich.console import Console
 
 from systembot.executor import execute_command
-from systembot.llm.client import History, Message, Ollama
+from systembot.llm.client import History, Message, Ollama, OpenAICompat
 from systembot.llm.loop import ToolLoop
 
 log = getLogger(__name__)
@@ -42,5 +42,7 @@ class Systembot:
         log.debug(f"User query: {query}")
         self.history.add(Message(role="user", content=query))
 
-        loop = ToolLoop(client=Ollama(), tools=[execute_command], history=self.history)
+        loop = ToolLoop(
+            client=OpenAICompat(), tools=[execute_command], history=self.history
+        )
         return loop.run()

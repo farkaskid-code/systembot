@@ -1,9 +1,14 @@
+from ast import literal_eval
+from json import dumps
 import logging
 from abc import ABC
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 
+import function_schema
 import ollama
+from function_schema import get_function_schema
+from openai import OpenAI
 from rich.console import Console
 
 from systembot.config import settings
@@ -79,6 +84,46 @@ class Ollama(Client):
                     args=call.function.arguments,
                 )
                 for call in response.message.tool_calls
+            ]
+        history.add(msg)
+        return msg
+
+
+@dataclass
+class OpenAICompat(Client):
+    client: OpenAI = field(
+        default_factory=lambda: OpenAI(
+            base_url=settings.client.host, api_key=settings.client.api_key
+        )
+    )
+
+    def chat(self, history: History, tools: list[Callable]) -> Message:
+        try:
+            with console.status("[green]Thinking..."):
+                response = self.client.chat.completions.create(
+                    model=settings.client.model,
+                    messages=history.messages,
+                    tools=[
+                        {"type": "function", "function": get_function_schema(tool)}
+                        for tool in tools
+                    ],
+                )
+        except Exception as e:
+            error = f"Failed to call model: {e}"
+            log.error(error)
+            raise ClientError(error)
+
+        message = response.choices[0].message
+        log.debug(f"Model responded with: {message}")
+        msg = Message(role="assistant", content=message.content)
+        if message.reasoning:
+            msg.thinking = message.reasoning
+        if message.tool_calls:
+            msg.toolcalls = [
+                ToolCall(
+                    name=call.function.name, args=literal_eval(call.function.arguments)
+                )
+                for call in message.tool_calls
             ]
         history.add(msg)
         return msg
