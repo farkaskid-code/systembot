@@ -1,11 +1,9 @@
-from ast import literal_eval
-from json import dumps
 import logging
 from abc import ABC
+from ast import literal_eval
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 
-import function_schema
 import ollama
 from function_schema import get_function_schema
 from openai import OpenAI
@@ -19,17 +17,38 @@ console = Console()
 
 @dataclass
 class ToolCall:
-    name: str
+    name: str = None
+    id: str = None
+    type: str = "function"
+    function: dict = field(default_factory=dict)
     args: dict = field(default_factory=dict)
 
 
 @dataclass
 class Message:
     role: str
-    content: str = ""
+    content: str = None
     thinking: str = None
     tool_name: str = None
+    tool_call_id: str = None
     toolcalls: list[ToolCall] = field(default_factory=list)
+
+    def asdict(self) -> dict:
+        data = {"role": self.role, "content": self.content}
+
+        if self.thinking:
+            data["thinking"] = self.thinking
+
+            #       if self.tool_name:
+            # data["tool_name"] = self.tool_name
+            #
+        if self.tool_call_id:
+            data["tool_call_id"] = self.tool_call_id
+
+        if len(self.toolcalls):
+            data["tool_calls"] = [asdict(call) for call in self.toolcalls]
+
+        return data
 
 
 @dataclass
@@ -37,7 +56,7 @@ class History:
     messages: list[dict] = field(default_factory=list)
 
     def add(self, msg: Message):
-        self.messages.append(asdict(msg))
+        self.messages.append(msg.asdict())
 
 
 @dataclass
@@ -80,8 +99,10 @@ class Ollama(Client):
         if response.message.tool_calls:
             msg.toolcalls = [
                 ToolCall(
-                    name=call.function.name,
-                    args=call.function.arguments,
+                    function={
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
                 )
                 for call in response.message.tool_calls
             ]
@@ -98,6 +119,7 @@ class OpenAICompat(Client):
     )
 
     def chat(self, history: History, tools: list[Callable]) -> Message:
+        log.debug(f"Messages: {history.messages}")
         try:
             with console.status("[green]Thinking..."):
                 response = self.client.chat.completions.create(
@@ -116,12 +138,19 @@ class OpenAICompat(Client):
         message = response.choices[0].message
         log.debug(f"Model responded with: {message}")
         msg = Message(role="assistant", content=message.content)
-        if message.reasoning:
+
+        if hasattr(message, "reasoning"):
             msg.thinking = message.reasoning
         if message.tool_calls:
             msg.toolcalls = [
                 ToolCall(
-                    name=call.function.name, args=literal_eval(call.function.arguments)
+                    name=call.function.name,
+                    args=literal_eval(call.function.arguments),
+                    id=call.id,
+                    function={
+                        "name": call.function.name,
+                        "arguments": call.function.arguments,
+                    },
                 )
                 for call in message.tool_calls
             ]

@@ -1,3 +1,4 @@
+from ast import literal_eval
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -35,14 +36,20 @@ class ToolLoop:
                 return msg.content
 
             for call in msg.toolcalls:
-                tool = tool_map.get(call.name, None)
+                tool = tool_map.get(call.function["name"], None)
                 if tool:
                     log.info(
                         f"Turn {turn}: Calling tool {tool.__name__} with args {call.args}"
                     )
+                    tool_args = call.function["arguments"]
+                    if type(tool_args) == str:
+                        tool_args = literal_eval(tool_args)
                     self.history.add(
                         Message(
-                            role="tool", tool_name=call.name, content=tool(**call.args)
+                            role="tool",
+                            tool_name=call.name,
+                            tool_call_id=call.id,
+                            content=tool(**tool_args),
                         )
                     )
                 else:
