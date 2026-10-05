@@ -3,10 +3,13 @@ import subprocess
 from json import dumps
 from typing import NamedTuple
 
+from rich.console import Console
+
 from systembot.config import settings
 from systembot.validator import validate_command
 
 log = logging.getLogger(__name__)
+console = Console()
 
 
 class CmdResult(NamedTuple):
@@ -61,6 +64,8 @@ def execute_command(cmd: str) -> str:
         return result.json()
 
     log.info(f"Executing command '{cmd}'")
+    console.print("Running: ", style="yellow", end="")
+    console.print(cmd)
     try:
         result = subprocess.run(
             cmd,
@@ -70,15 +75,15 @@ def execute_command(cmd: str) -> str:
             timeout=timeout,
             check=False,
         )
+        log.info(
+            f"Command '{cmd}' successfully executed with return_code: {result.returncode}"
+        )
         return CmdResult(
             command=cmd,
             return_code=result.returncode,
             stdout=result.stdout,
             stderr=result.stderr,
         ).json()
-        log.info(
-            f"Command '{cmd}' successfully executed with return_code: {result.returncode}"
-        )
     except subprocess.TimeoutExpired as e:
         log.error(f"Command '{cmd}' timed out because: {e}")
         return CmdResult(

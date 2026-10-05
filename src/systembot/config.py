@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from sys import exit
 
+from rich.console import Console
 from yaml import YAMLError, safe_dump, safe_load
 
 from systembot.cli import parse_args
@@ -11,6 +12,8 @@ from systembot.cli import parse_args
 log = logging.getLogger(__name__)
 
 DATAPATH = Path.home() / ".systembot"
+
+console = Console()
 
 
 @dataclass
@@ -37,6 +40,7 @@ class Config:
     logging: Logging = field(default_factory=Logging)
     max_turns: int = 6
     command_timeout: int = 10
+    args: Namespace = None
 
     def from_yaml(self, path: Path):
         data = {}
@@ -69,7 +73,11 @@ class Config:
         if "command_timeout" in data:
             self.command_timeout = data["command_timeout"]
 
+        if "blacklist" in data:
+            self.blacklist = data["blacklist"]
+
     def from_args(self, args: Namespace):
+        self.args = args
         if args.url and args.model:
             if not self.client:
                 self.client = LLMClient(host=args.url, model=args.model)
@@ -95,8 +103,9 @@ def bootstrap() -> Config:
 
     if not DATAPATH.exists():
         if args.url is None or args.model is None:
-            print(
-                "Initial run. No config file. Pass Ollama host URL with -u and model name with -m"
+            console.print(
+                "Initial run. No config file. Pass Ollama host URL with -u and model name with -m",
+                style="red",
             )
             exit(1)
         config.from_args(args)
