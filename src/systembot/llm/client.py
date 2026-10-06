@@ -141,24 +141,23 @@ class OpenAICompat(Client):
             log.error(error)
             raise ClientError(error)
 
-        message = response.choices[0].message
-        log.debug(f"Model responded with: {message}")
-        msg = Message(role="assistant", content=message.content)
+        model_msg = response.choices[0].message
+        log.debug(f"Model responded with: {model_msg}")
+        msg = Message(role="assistant")
 
-        if hasattr(message, "reasoning"):
-            msg.thinking = message.reasoning
-        if message.tool_calls:
-            msg.toolcalls = [
+        if model_msg.content:
+            msg.content = model_msg.content
+
+        if model_msg.tool_calls:
+            msg.tool_calls = [
                 ToolCall(
-                    name=call.function.name,
-                    args=literal_eval(call.function.arguments),
                     id=call.id,
-                    function={
-                        "name": call.function.name,
-                        "arguments": call.function.arguments,
-                    },
+                    function=Function(
+                        name=call.function.name,
+                        arguments=call.function.arguments,
+                    ),
                 )
-                for call in message.tool_calls
+                for call in model_msg.tool_calls
             ]
         history.add(msg)
         return msg

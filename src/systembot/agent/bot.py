@@ -32,7 +32,7 @@ class Systembot:
 
     def platform_context(self):
         current_platform = platform.system()
-        log.debug(f"Operating on: {current_platform}")
+        log.info(f"Operating on: {current_platform}")
         context = f"You are on: {current_platform}, generate commands accordingly"
         self.history.add(Message(role="system", content=context))
 
@@ -40,9 +40,10 @@ class Systembot:
         self.setup_prompt()
         self.platform_context()
 
-        log.debug(f"User query: {query}")
+        log.info(f"User query: {query}")
         self.history.add(Message(role="user", content=query))
 
+        log.debug(f"Using client for: {settings.client.provider}")
         client = (
             OpenAICompat() if settings.client.provider == "openai-compat" else Ollama()
         )
