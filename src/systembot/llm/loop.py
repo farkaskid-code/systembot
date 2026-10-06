@@ -31,23 +31,23 @@ class ToolLoop:
                 console.print(e, style="red")
                 return f"{e}"
 
-            if len(msg.toolcalls) == 0:
-                log.info(f"Turn {turn}: No toolcalls, existing loop")
+            if not msg.tool_calls:
+                log.info(f"Turn {turn}: No Toolcalls, exiting loop")
                 return msg.content
 
-            for call in msg.toolcalls:
-                tool = tool_map.get(call.function["name"], None)
+            for call in msg.tool_calls:
+                function = call.function
+                tool = tool_map.get(function.name, None)
                 if tool:
                     log.info(
-                        f"Turn {turn}: Calling tool {tool.__name__} with args {call.args}"
+                        f"Turn {turn}: Calling tool {tool.__name__} with args {call.function.arguments}"
                     )
-                    tool_args = call.function["arguments"]
+                    tool_args = function.arguments
                     if type(tool_args) == str:
                         tool_args = literal_eval(tool_args)
                     self.history.add(
                         Message(
                             role="tool",
-                            tool_name=call.name,
                             tool_call_id=call.id,
                             content=tool(**tool_args),
                         )

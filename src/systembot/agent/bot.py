@@ -48,4 +48,6 @@ class Systembot:
         )
 
         loop = ToolLoop(client=client, tools=[execute_command], history=self.history)
-        return loop.run()
+        result = loop.run()
+        log.debug(f"History: {self.history.messages}")
+        return result

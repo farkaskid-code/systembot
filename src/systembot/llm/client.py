@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from ast import literal_eval
+from ast import arguments, literal_eval
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 
@@ -16,12 +16,16 @@ console = Console()
 
 
 @dataclass
+class Function:
+    name: str
+    arguments: dict
+
+
+@dataclass
 class ToolCall:
-    name: str = None
+    function: Function
     id: str = None
     type: str = "function"
-    function: dict = field(default_factory=dict)
-    args: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -29,24 +33,23 @@ class Message:
     role: str
     content: str = None
     thinking: str = None
-    tool_name: str = None
     tool_call_id: str = None
-    toolcalls: list[ToolCall] = field(default_factory=list)
+    tool_calls: list[ToolCall] = None
 
     def asdict(self) -> dict:
-        data = {"role": self.role, "content": self.content}
+        data = {"role": self.role}
+
+        if self.content:
+            data["content"] = self.content
 
         if self.thinking:
             data["thinking"] = self.thinking
 
-            #       if self.tool_name:
-            # data["tool_name"] = self.tool_name
-            #
         if self.tool_call_id:
             data["tool_call_id"] = self.tool_call_id
 
-        if len(self.toolcalls):
-            data["tool_calls"] = [asdict(call) for call in self.toolcalls]
+        if self.tool_calls:
+            data["tool_calls"] = [asdict(call) for call in self.tool_calls]
 
         return data
 
@@ -89,22 +92,25 @@ class Ollama(Client):
             log.error(error)
             raise ClientError(error)
 
-        log.debug(f"Model responded with: {response.message}")
-        msg = Message(
-            role="assistant",
-            content=response.message.content,
-        )
-        if response.message.thinking:
-            msg.thinking = response.message.thinking
-        if response.message.tool_calls:
-            msg.toolcalls = [
+        model_msg = response.message
+        log.debug(f"Model responded with: {model_msg}")
+
+        msg = Message(role="assistant")
+        if model_msg.content:
+            msg.content = model_msg.content
+
+        if model_msg.thinking:
+            msg.thinking = model_msg.thinking
+
+        if model_msg.tool_calls:
+            msg.tool_calls = [
                 ToolCall(
-                    function={
-                        "name": call.function.name,
-                        "arguments": call.function.arguments,
-                    },
+                    function=Function(
+                        name=call.function.name,
+                        arguments=call.function.arguments,
+                    ),
                 )
-                for call in response.message.tool_calls
+                for call in model_msg.tool_calls
             ]
         history.add(msg)
         return msg
