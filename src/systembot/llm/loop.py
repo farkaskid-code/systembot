@@ -1,12 +1,12 @@
-from ast import literal_eval
 import logging
+from ast import literal_eval
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 from rich.console import Console
 
-from systembot.config import settings
+from systembot.bootstrap import runtime
 from systembot.llm.client import Client, ClientError, History, Message
 
 log = logging.getLogger(__name__)
@@ -20,10 +20,11 @@ class ToolLoop:
     history: History
 
     def run(self) -> str:
-        log.info(f"Running tool loop with {settings.max_turns} maximum turns")
+        max_turns = runtime.config.max_turns
+        log.info(f"Running tool loop with {max_turns} maximum turns")
         tool_map = {tool.__name__: tool for tool in self.tools}
 
-        for turn in range(1, settings.max_turns + 1):
+        for turn in range(1, max_turns + 1):
             try:
                 msg = self.client.chat(self.history, self.tools)
             except ClientError as e:

@@ -1,6 +1,6 @@
 import logging
 
-from systembot.config import settings
+from systembot.bootstrap import runtime
 
 log = logging.getLogger(__name__)
 
@@ -9,7 +9,7 @@ def validate_command(command: str) -> list[str]:
     commands = command.strip().split("&&")
     log.debug("Validating commands against blacklist")
 
-    blacklist = settings.blacklist
+    blacklist = runtime.config.blacklist
     if len(blacklist) == 0:
         log.warning("No commands are blacklisted, consider adding some")
         blacklist = ["rm", "shutdown", "reboot", "dd", "mkfs"]

@@ -1,6 +1,5 @@
 import logging
 from abc import ABC
-from ast import arguments, literal_eval
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 
@@ -8,8 +7,6 @@ import ollama
 from function_schema import get_function_schema
 from openai import OpenAI
 from rich.console import Console
-
-from systembot.config import settings
 
 log = logging.getLogger(__name__)
 console = Console()
@@ -73,16 +70,16 @@ class ClientError(RuntimeError):
 
 @dataclass
 class Ollama(Client):
-    client: ollama.Client = field(
-        default_factory=lambda: ollama.Client(host=settings.client.host)
-    )
+    client: ollama.Client
+    model: str
+    options: dict = field(default_factory=dict)
 
     def chat(self, history: History, tools: list[Callable]) -> Message:
         try:
             with console.status("[green]Thinking..."):
                 response = self.client.chat(
-                    model=settings.client.model,
-                    options=settings.client.options,
+                    model=self.model,
+                    options=self.options,
                     messages=history.messages,
                     tools=tools,
                 )
@@ -118,18 +115,15 @@ class Ollama(Client):
 
 @dataclass
 class OpenAICompat(Client):
-    client: OpenAI = field(
-        default_factory=lambda: OpenAI(
-            base_url=settings.client.host, api_key=settings.client.api_key
-        )
-    )
+    client: OpenAI
+    model: str
 
     def chat(self, history: History, tools: list[Callable]) -> Message:
         log.debug(f"Messages: {history.messages}")
         try:
             with console.status("[green]Thinking..."):
                 response = self.client.chat.completions.create(
-                    model=settings.client.model,
+                    model=self.model,
                     messages=history.messages,
                     tools=[
                         {"type": "function", "function": get_function_schema(tool)}

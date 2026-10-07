@@ -3,13 +3,13 @@ from rich.markdown import Markdown
 from rich.rule import Rule
 
 from systembot.agent.bot import Systembot
-from systembot.config import settings
+from systembot.bootstrap import runtime
 
 console = Console()
 
 
 def main():
-    answer = Systembot().ask(settings.args.query)
+    answer = Systembot().ask(runtime.query)
     console.print(Rule())
     console.print("[SYSTEMBOT]:", style="bold green")
     console.print(Markdown(answer))

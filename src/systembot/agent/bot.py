@@ -5,9 +5,9 @@ from pathlib import Path
 
 from rich.console import Console
 
-from systembot.config import settings
+from systembot.bootstrap import runtime
 from systembot.executor import execute_command
-from systembot.llm.client import History, Message, Ollama, OpenAICompat
+from systembot.llm.client import History, Message
 from systembot.llm.loop import ToolLoop
 
 log = getLogger(__name__)
@@ -43,12 +43,11 @@ class Systembot:
         log.info(f"User query: {query}")
         self.history.add(Message(role="user", content=query))
 
-        log.debug(f"Using client for: {settings.client.provider}")
-        client = (
-            OpenAICompat() if settings.client.provider == "openai-compat" else Ollama()
-        )
+        log.debug(f"Using client for: {runtime.config.client.provider}")
 
-        loop = ToolLoop(client=client, tools=[execute_command], history=self.history)
+        loop = ToolLoop(
+            client=runtime.client, tools=[execute_command], history=self.history
+        )
         result = loop.run()
         log.debug(f"History: {self.history.messages}")
         return result

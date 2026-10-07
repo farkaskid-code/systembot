@@ -5,7 +5,7 @@ from typing import NamedTuple
 
 from rich.console import Console
 
-from systembot.config import settings
+from systembot.bootstrap import runtime
 from systembot.validator import validate_command
 
 log = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ def execute_command(cmd: str) -> str:
         "stderr" - The standard error of the command.
     """
 
-    timeout = settings.command_timeout
+    timeout = runtime.config.command_timeout
     log.debug(f"Timeout set to {timeout} seconds")
 
     log.info(f"Validating commands in: {cmd}")

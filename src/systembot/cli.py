@@ -5,7 +5,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="System Bot CLI Parser")
 
     parser.add_argument(
-        "-u", "--url", type=str, required=False, help="Inference server URL"
+        "-u", "--base_url", type=str, required=False, help="Inference server URL"
     )
     parser.add_argument("-m", "--model", type=str, required=False, help="Model name")
     parser.add_argument(
