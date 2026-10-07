@@ -1,10 +1,10 @@
 # systembot
 
 ## Overview
-`systembot` is a CLI tool that acts as a bridge between natural language instructions and shell execution, using a local LLM for command generation and analysis. It ensures safe execution of commands by validating them against a configurable blacklist.
+`systembot` is a CLI tool that acts as a bridge between natural language instructions and shell execution, using a local Ollama server or any OpenAI compatible inference server for command generation and analysis. It ensures safe execution of commands by validating them against a configurable blacklist.
 
 ## Prerequisites
-- Ollama server running with the desired model.
+- An Ollama server running with the desired model for local use or an OpenAI compatible inference service account.
 - Python 3.x installed.
 - [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager installed.
 
@@ -20,13 +20,13 @@
    ```
 
 ## Getting Started
-You need a Ollama server and a tool calling model for this to work, it's required. Once setup, just run,
+You need a tool calling model for this to work, it's required. Once setup, just run,
 ```bash
-systembot -u http://{ollama-server-host}:11434 -m {model-name} "hello"
+systembot -p {provider} -u {inference API url} -m {model-name} -k {api_key} "hello"
 ```
 
 to do a test run. This will create a basic config file at `~/.systembot/config.yaml`.
-Once the configuration file is there, you don't need to pass the `-u` and `-m` flags.
+Once the configuration file is there, you don't need to pass the, `-p`, `-u` and `-m` flags.
 Simply go,
 ```bash
 sysetmbot "what's my IP?"
@@ -35,10 +35,13 @@ sysetmbot "what's my IP?"
 ## Configuration Reference
 Configuration file is at `~/.systembot/config.yaml` with the following content:
 ```yaml
-model: # Required: it needs an Ollama server to work
-  host: http://{ollama-server-host}:11434
-  name: qwen3:14b # A model that supports tool calling
-  num_ctx: 16384 # Optional
+client: # Required: it needs an Ollama server to work
+  provider: ollama # can be 'ollama' or 'openai-compat' for public inference servers
+  base_url: http://{ollama-server-host}:11434
+  model: qwen3:14b # A model that supports tool calling
+  options: {} # model params like num_ctx, temperature. Only effective when using 'ollama' provider
+  api_key: <key> # API key required for using public inference servers
+  
 
 blacklist: # Optional but recommended for safety guardrails
   - rm
