@@ -1,7 +1,7 @@
 # systembot
 
 ## Overview
-`systembot` is a CLI tool that acts as a bridge between natural language instructions and shell execution, using a local Ollama server or any OpenAI compatible inference server for command generation and analysis. It ensures safe execution of commands by validating them against a configurable blacklist.
+`systembot` is a CLI tool that acts as a bridges natural language instructions and shell execution, using a local Ollama server or any OpenAI compatible inference service for command generation and analysis. It ensures safe execution of commands by validating them against a configurable blacklist.
 
 ## Prerequisites
 - An Ollama server running with the desired model for local use or an OpenAI compatible inference service account.
@@ -29,8 +29,18 @@ to do a test run. This will create a basic config file at `~/.systembot/config.y
 Once the configuration file is there, you don't need to pass the, `-p`, `-u` and `-m` flags.
 Simply go,
 ```bash
-sysetmbot "what's my IP?"
+systembot "what's my IP?"
 ```
+
+## CLI Reference
+Following are the available flag,
+
+- `-p` or `--provider`: Can either be `ollama` or `openai-compat`. `ollama` is for running with local inference setups with ollama and `openai-compat` is for running with inference API services that support the OpenAI format.
+- `-u` or `--base_url`: Base url for the inference server.
+- `-m` or `--model`: The name of the model to be used.
+- `-k` or `--api_key`: API key when using `openai-compat` provider. This is not needed when `ollama` provider is used.
+
+As mentioned above, you don't to pass any of these flags when the configuration file is present. If you pass flags and config file is present, then the flags with override the information from the config file. 
 
 ## Configuration Reference
 Configuration file is at `~/.systembot/config.yaml` with the following content:
