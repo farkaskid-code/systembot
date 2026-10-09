@@ -15,7 +15,7 @@ class Interaction:
 
 @dataclass
 class Context:
-    cap: int
+    cap: int = -1
     size: int = 0
     dropped: int = 0
     history: list[Interaction] = field(default_factory=list)
@@ -24,10 +24,11 @@ class Context:
         self.history.append(interaction)
 
     def get_messages(self) -> list[dict]:
-        while self.size > self.cap:
-            self.size -= self.history[self.dropped + 1].ctx_size
-            self.dropped += 1
-            log.debug(f"Dropped turn: {self.dropped} from the context history")
+        if self.cap != -1:
+            while self.size > self.cap:
+                self.size -= self.history[self.dropped + 1].ctx_size
+                self.dropped += 1
+                log.debug(f"Dropped turn: {self.dropped} from the context history")
 
         messages = []
         for interaction in [self.history[0], *self.history[self.dropped + 1 :]]:

@@ -34,7 +34,9 @@ def setup_prompt() -> Message:
 
 @dataclass
 class Systembot:
-    context: Context = field(default_factory=lambda: Context(cap=15000))
+    context: Context = field(
+        default_factory=lambda: Context(cap=int(runtime.ctx_size * 0.9))
+    )
 
     def ask(self, query: str) -> str:
         system_prompt_msg = setup_prompt()
