@@ -32,6 +32,7 @@ class Message:
     thinking: str = None
     tool_call_id: str = None
     tool_calls: list[ToolCall] = None
+    ctx_size: int = -1
 
     def asdict(self) -> dict:
         data = {"role": self.role}
@@ -52,16 +53,8 @@ class Message:
 
 
 @dataclass
-class History:
-    messages: list[dict] = field(default_factory=list)
-
-    def add(self, msg: Message):
-        self.messages.append(msg.asdict())
-
-
-@dataclass
 class Client(ABC):
-    def chat(self, history: History, tools: list[Callable]) -> Message: ...
+    def chat(self, messages: list[dict], tools: list[Callable]) -> Message: ...
 
 
 class ClientError(RuntimeError):
@@ -74,13 +67,13 @@ class Ollama(Client):
     model: str
     options: dict = field(default_factory=dict)
 
-    def chat(self, history: History, tools: list[Callable]) -> Message:
+    def chat(self, messages: list[dict], tools: list[Callable]) -> Message:
         try:
             with console.status("[green]Thinking..."):
                 response = self.client.chat(
                     model=self.model,
                     options=self.options,
-                    messages=history.messages,
+                    messages=messages,
                     tools=tools,
                 )
             log.debug(f"Model responded in: {response.total_duration / 10**9} seconds")
@@ -93,6 +86,8 @@ class Ollama(Client):
         log.debug(f"Model responded with: {model_msg}")
 
         msg = Message(role="assistant")
+        msg.ctx_size = response.prompt_eval_count
+
         if model_msg.content:
             msg.content = model_msg.content
 
@@ -109,7 +104,6 @@ class Ollama(Client):
                 )
                 for call in model_msg.tool_calls
             ]
-        history.add(msg)
         return msg
 
 
@@ -118,13 +112,12 @@ class OpenAICompat(Client):
     client: OpenAI
     model: str
 
-    def chat(self, history: History, tools: list[Callable]) -> Message:
-        log.debug(f"Messages: {history.messages}")
+    def chat(self, messages: list[dict], tools: list[Callable]) -> Message:
         try:
             with console.status("[green]Thinking..."):
                 response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=history.messages,
+                    messages=messages,
                     tools=[
                         {"type": "function", "function": get_function_schema(tool)}
                         for tool in tools
@@ -138,6 +131,7 @@ class OpenAICompat(Client):
         model_msg = response.choices[0].message
         log.debug(f"Model responded with: {model_msg}")
         msg = Message(role="assistant")
+        msg.ctx_size = response.usage.prompt_tokens
 
         if model_msg.content:
             msg.content = model_msg.content
@@ -153,5 +147,4 @@ class OpenAICompat(Client):
                 )
                 for call in model_msg.tool_calls
             ]
-        history.add(msg)
         return msg

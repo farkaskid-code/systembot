@@ -7,47 +7,48 @@ from rich.console import Console
 
 from systembot.bootstrap import runtime
 from systembot.executor import execute_command
-from systembot.llm.client import History, Message
+from systembot.llm.client import Message
+from systembot.llm.context import Context, Interaction
 from systembot.llm.loop import ToolLoop
 
 log = getLogger(__name__)
 console = Console()
 
 
-@dataclass
-class Systembot:
-    history: History = field(default_factory=History)
-
-    def setup_prompt(self):
-        path = Path(__file__).resolve().parent / "systembot_prompt.md"
-        try:
-            log.debug(f"Reading system_prompt from: {path}")
-            prompt = path.read_text()
-        except FileNotFoundError:
-            msg = f"Failed to initialize the bot with system_prompt, check if {path} exists"
-            log.error(msg)
-            console.print(msg, style="red")
-
-        self.history.add(Message(role="system", content=prompt))
-
-    def platform_context(self):
+def setup_prompt() -> Message:
+    path = Path(__file__).resolve().parent / "systembot_prompt.md"
+    try:
+        log.debug(f"Reading system_prompt from: {path}")
+        prompt = path.read_text()
         current_platform = platform.system()
         log.info(f"Operating on: {current_platform}")
-        context = f"You are on: {current_platform}, generate commands accordingly"
-        self.history.add(Message(role="system", content=context))
+        prompt = (
+            f"{prompt}\n\nYou are on: {current_platform}, generate commands accordingly"
+        )
+        return Message(role="system", content=prompt)
+    except FileNotFoundError:
+        msg = f"Failed to initialize the bot with system_prompt, check if {path} exists"
+        log.error(msg)
+        console.print(msg, style="red")
+
+
+@dataclass
+class Systembot:
+    context: Context = field(default_factory=lambda: Context(cap=15000))
 
     def ask(self, query: str) -> str:
-        self.setup_prompt()
-        self.platform_context()
+        system_prompt_msg = setup_prompt()
 
         log.info(f"User query: {query}")
-        self.history.add(Message(role="user", content=query))
+        query_msg = Message(role="user", content=query)
+
+        self.context.add(Interaction(model_msg=system_prompt_msg, reply_msg=query_msg))
 
         log.debug(f"Using client for: {runtime.config.client.provider}")
 
         loop = ToolLoop(
-            client=runtime.client, tools=[execute_command], history=self.history
+            client=runtime.client, tools=[execute_command], context=self.context
         )
         result = loop.run()
-        log.debug(f"History: {self.history.messages}")
+        log.debug(f"History: {self.context.history}")
         return result
