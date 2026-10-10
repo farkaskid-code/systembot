@@ -40,7 +40,7 @@ class Runtime:
 
     @property
     def ctx_size(self) -> int:
-        return self.config.client.options.get("num_ctx", -1)
+        return self.config.client.options.get("num_ctx", 0)
 
 
 def bootstrap() -> Runtime:

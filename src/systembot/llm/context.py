@@ -15,7 +15,7 @@ class Interaction:
 
 @dataclass
 class Context:
-    cap: int = -1
+    cap: int = 0
     size: int = 0
     dropped: int = 0
     history: list[Interaction] = field(default_factory=list)
@@ -24,7 +24,7 @@ class Context:
         self.history.append(interaction)
 
     def get_messages(self) -> list[dict]:
-        if self.cap != -1:
+        if self.cap != 0:
             while self.size > self.cap:
                 self.size -= self.history[self.dropped + 1].ctx_size
                 self.dropped += 1
