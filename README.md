@@ -68,6 +68,8 @@ max_turns: 8 # Optional. Max turn allowed for the agent loop
 command_timeout: 10 # Optional. Timeout in seconds for shell command execution
 ```
 
+**Context Management:** When `num_ctx` option is provided in client options, it will be used as context token budget for the internal chat loop.
+
 ## Usage
 Run the tool with a natural language prompt:
 ```bash
