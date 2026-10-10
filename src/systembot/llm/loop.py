@@ -60,6 +60,6 @@ class ToolLoop:
                     )
                     self.context.add(Interaction(model_msg=msg, reply_msg=tool_msg))
                 else:
-                    log.info(f"Turn {turn}: No tools found for call {call.name}")
+                    log.info(f"Turn {turn}: No tools found for call {call}")
 
         return "Maximum turns execeeded"
