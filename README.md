@@ -49,8 +49,9 @@ client: # Required: it needs an Ollama server to work
   provider: ollama # can be 'ollama' or 'openai-compat' for public inference servers
   base_url: http://{ollama-server-host}:11434
   model: qwen3:14b # A model that supports tool calling
-  options: {} # model params like num_ctx, temperature. Only effective when using 'ollama' provider
   api_key: <key> # API key required for using public inference servers
+  num_ctx: 16384 # Defaults to 16384. Only effective as a model param when using 'ollama' provider
+  temperature: 0.7 # Model's temperature, defaults to 0.7.
   
 
 blacklist: # Optional but recommended for safety guardrails
