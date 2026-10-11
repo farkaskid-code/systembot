@@ -26,7 +26,6 @@ class ToolLoop:
         tool_map = {tool.__name__: tool for tool in self.tools}
 
         for turn in range(1, max_turns + 1):
-            interaction = self.context.history[-1]
             try:
                 msg = self.client.chat(self.context.get_messages(), self.tools)
             except ClientError as e:
@@ -34,6 +33,7 @@ class ToolLoop:
                 console.print(e, style="red")
                 return f"{e}"
 
+            interaction = self.context.history[-1]
             interaction.ctx_size = msg.ctx_size - self.context.size
             self.context.size = msg.ctx_size
             log.info(f"Turn {turn}: Context size - {self.context.size} tokens")

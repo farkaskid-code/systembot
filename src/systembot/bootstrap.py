@@ -27,20 +27,26 @@ class Runtime:
         host = self.args.base_url if self.args.base_url else self.config.client.base_url
         model = self.args.model if self.args.model else self.config.client.model
         if provider == "ollama":
-            options = self.config.client.options
-            return Ollama(client=ollama.Client(host=host), model=model, options=options)
+            return Ollama(
+                client=ollama.Client(host=host),
+                model=model,
+                options={
+                    "num_ctx": self.config.client.num_ctx,
+                    "temperature": self.config.client.temperature,
+                },
+            )
 
         key = self.args.api_key if self.args.api_key else self.config.client.api_key
 
-        return OpenAICompat(client=OpenAI(base_url=host, api_key=key), model=model)
+        return OpenAICompat(
+            client=OpenAI(base_url=host, api_key=key),
+            model=model,
+            temperature=self.config.client.temperature,
+        )
 
     @property
     def query(self) -> str:
         return self.args.query
-
-    @property
-    def ctx_size(self) -> int:
-        return self.config.client.options.get("num_ctx", 0)
 
 
 def bootstrap() -> Runtime:

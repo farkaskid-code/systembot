@@ -16,7 +16,7 @@ console = Console()
 
 
 def setup_prompt() -> Message:
-    path = Path(__file__).resolve().parent / "systembot_prompt.md"
+    path = Path(__file__).resolve().parent / "prompt.md"
     try:
         log.debug(f"Reading system_prompt from: {path}")
         prompt = path.read_text()
@@ -35,7 +35,7 @@ def setup_prompt() -> Message:
 @dataclass
 class Systembot:
     context: Context = field(
-        default_factory=lambda: Context(cap=int(runtime.ctx_size * 0.9))
+        default_factory=lambda: Context(cap=int(runtime.config.client.num_ctx * 0.9))
     )
 
     def ask(self, query: str) -> str:

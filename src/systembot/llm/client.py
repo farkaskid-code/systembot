@@ -111,6 +111,7 @@ class Ollama(Client):
 class OpenAICompat(Client):
     client: OpenAI
     model: str
+    temperature: float
 
     def chat(self, messages: list[dict], tools: list[Callable]) -> Message:
         try:
@@ -122,6 +123,7 @@ class OpenAICompat(Client):
                         {"type": "function", "function": get_function_schema(tool)}
                         for tool in tools
                     ],
+                    temperature=self.temperature,
                 )
         except Exception as e:
             error = f"Failed to call model: {e}"

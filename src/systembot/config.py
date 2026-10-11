@@ -16,7 +16,8 @@ class LLMClient:
     base_url: str = None
     model: str = None
     api_key: str = None
-    options: dict = field(default_factory=dict)
+    num_ctx: int = 16384
+    temperature: float = 0.7
 
     def valid(self) -> bool:
         if not self.provider:
@@ -86,7 +87,8 @@ def read_config() -> Config:
             provider=client_data["provider"],
             base_url=client_data["base_url"],
             model=client_data["model"],
-            options=client_data["options"],
+            num_ctx=client_data["num_ctx"],
+            temperature=client_data["temperature"],
         )
         if "api_key" in client_data:
             config.client.api_key = client_data["api_key"]
