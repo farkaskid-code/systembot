@@ -48,6 +48,12 @@ class Runtime:
     def query(self) -> str:
         return self.args.query
 
+    @property
+    def context_size(self) -> int:
+        if self.config.client.provider == "ollama":
+            return self.config.client.num_ctx
+        return 0
+
 
 def bootstrap() -> Runtime:
     runtime = Runtime()
