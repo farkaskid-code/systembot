@@ -9,7 +9,7 @@ console = Console()
 
 
 def main():
-    answer = Systembot().ask(runtime.query)
+    answer = Systembot().ask(runtime.query) or "Unexpected response from the model"
     console.print(Rule())
     console.print("[SYSTEMBOT]:", style="bold green")
     console.print(Markdown(answer))
