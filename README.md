@@ -90,7 +90,8 @@ General queries about the system, basic tasks.
 ### Advanced use case:
 You can create instruction / task files for specific workflows and ask `systembot` to execute that workflow with the `-t` or `--task` flag.
 
-<img width="1458" height="1032" alt="Screenshot From 2026-10-02 19-07-43" src="https://github.com/user-attachments/assets/5cae99b4-ab4f-435c-8b44-149a6ae4b06e" />
+<img width="1920" height="876" alt="Screenshot From 2026-10-13 15-39-25" src="https://github.com/user-attachments/assets/ad2f8a38-7b77-4de2-a6a5-fca538692a14" />
+
 
 ## Notes
 - Platform agnostic, will work on Linux, Windows and Mac OS.
