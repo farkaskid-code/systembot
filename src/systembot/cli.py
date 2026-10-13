@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 
 def parse_args() -> argparse.Namespace:
@@ -22,6 +23,9 @@ def parse_args() -> argparse.Namespace:
         type=str,
         required=False,
         help="API key for remote inference servers",
+    )
+    parser.add_argument(
+        "-t", "--task", type=Path, required=False, help="Path to the task file"
     )
     parser.add_argument("query", type=str, help="Query string")
 

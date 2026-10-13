@@ -1,4 +1,5 @@
 import platform
+import sys
 from dataclasses import dataclass, field
 from logging import getLogger
 from pathlib import Path
@@ -25,6 +26,23 @@ def setup_prompt() -> Message:
         prompt = (
             f"{prompt}\n\nYou are on: {current_platform}, generate commands accordingly"
         )
+
+        if runtime.args.task:
+            task_path: Path = runtime.args.task
+            log.info(f"Reading task from: {runtime.args.task}")
+
+            try:
+                task_content = task_path.read_text()
+            except FileNotFoundError:
+                msg = f"Task file not found at: {task_path}"
+                log.error(msg)
+                console.print(msg, style="red")
+                sys.exit(1)
+
+            prompt = f"{prompt}\n\n----\n"
+            prompt = f"{prompt}Execute the following task based on the inputs from user query,\n\n"
+            prompt = f"{prompt}{task_content}"
+
         return Message(role="system", content=prompt)
     except FileNotFoundError:
         msg = f"Failed to initialize the bot with system_prompt, check if {path} exists"
